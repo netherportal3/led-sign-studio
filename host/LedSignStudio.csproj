@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>LedSignStudio</AssemblyName>
+    <RootNamespace>LedSignStudio</RootNamespace>
+    <ApplicationIcon>..\app\assets\icon.ico</ApplicationIcon>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- FileDescription is the name Windows shows for a pinned taskbar button. -->
+    <AssemblyTitle>LED Sign Studio</AssemblyTitle>
+    <Product>LED Sign Studio</Product>
+    <Company>LED Sign Studio</Company>
+    <Version>1.0.0</Version>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- Ship the referenced assemblies without their IntelliSense XML files. -->
+    <AllowedReferenceRelatedFileExtensions>.pdb</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Stable release published 2026-09-28. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\app\assets\icon.ico" LogicalName="LedSignStudio.icon.ico" />
+    <EmbeddedResource Include="..\app\assets\icon.png" LogicalName="LedSignStudio.icon.png" />
+  </ItemGroup>
+
+  <!-- The WebView2 package always references its WPF control too. This is a WinForms app:
+       drop it, which also silences the WindowsBase version conflict warning. -->
+  <Target Name="DropWebView2Wpf" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+
+</Project>

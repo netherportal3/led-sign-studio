@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>LED Sign Studio</title>
+  <link rel="icon" href="/assets/icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="brand-name">LED Sign Studio</span>
+        <span class="brand-sep" aria-hidden="true">/</span>
+        <button class="project-name" id="projectName" type="button" title="Rename or save this project">Untitled</button>
+      </div>
+
+      <div class="conn">
+        <div class="pill" id="connPill" data-state="searching" role="status" aria-live="polite">
+          <span class="dot"></span>
+          <span class="pill-text">Searching for the sign</span>
+          <span class="pill-bar"><i></i></span>
+        </div>
+        <span class="badge" id="fakeBadge" hidden title="The app is running without a real sign">Test mode</span>
+        <button class="btn sm" id="connectBtn" type="button">Connect</button>
+        <button class="amb-pill" id="ambientPill" type="button" hidden>
+          <span data-icon="ambient" class="ic-wrap"></span>
+          <span class="amb-pill-text">Ambient</span>
+        </button>
+      </div>
+
+      <div class="sign-controls" id="signControls">
+        <label class="bright" title="Sign brightness">
+          <span data-icon="sunDim" class="ic-wrap"></span>
+          <input type="range" class="range" id="brightness" min="1" max="10" step="1" value="10" aria-label="Brightness">
+          <span data-icon="sun" class="ic-wrap"></span>
+          <output id="brightnessOut" class="mono">10</output>
+        </label>
+        <label class="switch" title="Turn the sign's display on or off">
+          <input type="checkbox" id="powerToggle" checked>
+          <span class="track"><span class="thumb"></span></span>
+          <span class="switch-label">Display</span>
+        </label>
+      </div>
+
+      <div class="grow"></div>
+
+      <span class="save-state" id="saveState" data-state="saved">Saved</span>
+
+      <label class="switch live" id="liveWrap" title="Live mode: sends each change by itself. Each update takes about a second.">
+        <input type="checkbox" id="liveToggle">
+        <span class="track"><span class="thumb"></span></span>
+        <span class="switch-label">Live</span>
+      </label>
+
+      <div class="send-group">
+        <button class="btn primary send" id="sendBtn" type="button">
+          <span class="send-fill"></span>
+          <span data-icon="send" class="ic-wrap"></span>
+          <span class="send-label">Send to sign</span>
+        </button>
+        <button class="btn primary send-more" id="sendMore" type="button" aria-label="More ways to send" title="Send as slideshow" aria-haspopup="dialog" aria-expanded="false">
+          <span data-icon="down" class="ic-wrap"></span>
+        </button>
+      </div>
+
+      <button class="icon-btn ghost" id="helpBtn" type="button" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">
+        <span data-icon="keyboard" class="ic-wrap"></span>
+      </button>
+    </header>
+
+    <div class="banner error" id="offlineBanner" hidden><span class="msg"></span></div>
+
+    <main class="workspace">
+      <nav class="toolbar" id="toolbar" aria-label="Drawing tools"></nav>
+
+      <section class="center">
+        <section class="conn-help" id="connHelp" hidden aria-live="polite"></section>
+        <button class="conn-help-mini" id="connHelpMini" type="button" hidden>
+          <span data-icon="bluetooth" class="ic-wrap"></span>
+          <span>The sign is not connected. You can keep drawing.</span>
+          <span class="link">Show help</span>
+        </button>
+
+        <div class="editor-card">
+          <div class="toolopts" id="toolOpts"></div>
+          <div class="stage" id="stage">
+            <div class="stage-inner">
+              <canvas id="ledCanvas"></canvas>
+              <canvas id="overlayCanvas"></canvas>
+            </div>
+          </div>
+          <div class="colorbar" id="colorbar"></div>
+        </div>
+
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <aside class="panel" aria-label="Make content">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" data-tab="text" aria-controls="tab-text"><span data-icon="text" class="ic-wrap"></span>Text</button>
+          <button type="button" role="tab" data-tab="effects" aria-controls="tab-effects"><span data-icon="sparkles" class="ic-wrap"></span>Effects</button>
+          <button type="button" role="tab" data-tab="import" aria-controls="tab-import"><span data-icon="image" class="ic-wrap"></span>Import</button>
+          <button type="button" role="tab" data-tab="library" aria-controls="tab-library"><span data-icon="library" class="ic-wrap"></span>Library</button>
+          <button type="button" role="tab" data-tab="ambient" aria-controls="tab-ambient"><span data-icon="ambient" class="ic-wrap"></span>Ambient</button>
+        </div>
+        <div class="tab-body" id="tab-text" role="tabpanel"></div>
+        <div class="tab-body" id="tab-effects" role="tabpanel" hidden></div>
+        <div class="tab-body" id="tab-import" role="tabpanel" hidden></div>
+        <div class="tab-body" id="tab-library" role="tabpanel" hidden></div>
+        <div class="tab-body" id="tab-ambient" role="tabpanel" hidden></div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="drop-veil" id="dropVeil" hidden>
+    <div class="drop-veil-inner"><span data-icon="upload" class="ic-wrap"></span>Drop to import</div>
+  </div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="modalRoot"></div>
+</body>
+</html>

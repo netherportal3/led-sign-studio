@@ -1,0 +1,42 @@
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime data: settings, autosave, library, caches, logs and test data dirs (app/data/test-*)
+app/data/
+
+# .NET build output
+host/bin/
+host/obj/
+LedSignStudio/
+.vs/
+*.user
+
+# Scratch files, previews and test output
+/font*.png
+/preview*.png
+/preview*.gif
+/scratch/
+/tmp/
+/test-*/
+*.tmp
+*.log
+
+# Editors and OS
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Hidden folders at the root (tool and editor settings, private notes and history),
+# except GitHub settings
+/.*/
+!/.github/
