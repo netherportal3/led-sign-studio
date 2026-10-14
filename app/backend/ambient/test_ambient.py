@@ -793,6 +793,79 @@ class PacingTests(unittest.TestCase):
         self.assertLess(took2, took + 1.0)
 
 
+class ManualSendGateTests(unittest.TestCase):
+    """A day upload waits for its moment, then gives way only to a manual send made during that wait."""
+
+    class Sign:
+        def __init__(self):
+            self.uploads = []
+
+        def panel_size(self):
+            return PANEL_SIZE
+
+        def power(self, _on):
+            return {}
+
+        def brightness(self, _level):
+            return {}
+
+        def upload(self, job, _fn, _nbytes, _size):
+            self.uploads.append(job)
+            return {}
+
+    class Wait:
+        """Stands in for the stop event: returns at once, running `during` as if it happened mid-wait."""
+
+        def __init__(self, during=None):
+            self.during = during
+
+        def wait(self, _seconds):
+            if self.during:
+                self.during()
+            return False
+
+    def make(self, during=None):
+        import tempfile
+        from backend.ambient.service import AmbientController
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        sign = self.Sign()
+        ctrl = AmbientController(tmp.name, sign, run_scheduler=False)
+        ctrl._refresh_data = lambda cfg, light=False, force=False: (None, [])
+        ctrl._stop = self.Wait(during and (lambda: during(ctrl)))
+        return ctrl, sign
+
+    def test_resume_after_a_manual_send_uploads(self):
+        ctrl, sign = self.make()
+        ctrl.on_manual_send()
+        ctrl.resume()
+        ctrl._do_day(ctrl.settings.get())
+        self.assertEqual(sign.uploads, ["ambient"])
+        self.assertEqual(ctrl.sched.last_kind, "day")
+
+    def test_resume_after_a_day_upload_uploads(self):
+        ctrl, sign = self.make()
+        ctrl._do_day(ctrl.settings.get())
+        ctrl.resume()
+        ctrl._do_day(ctrl.settings.get())
+        self.assertEqual(sign.uploads, ["ambient", "ambient"])
+
+    def test_a_manual_send_during_the_wait_wins(self):
+        ctrl, sign = self.make(during=lambda c: c.on_manual_send())
+        ctrl.settings.update({"pause_minutes_on_manual": 0})   # no pause: only the send itself counts
+        ctrl._do_day(ctrl.settings.get())
+        self.assertEqual(sign.uploads, [])
+        self.assertEqual(ctrl.sched.last_kind, "manual")
+
+    def test_pause_during_the_wait_wins(self):
+        ctrl, sign = self.make(during=lambda c: c.pause(30))
+        ctrl._do_day(ctrl.settings.get())
+        self.assertEqual(sign.uploads, [])
+
+
+PANEL_SIZE = (64, 16)
+
+
 def _floor(t: datetime) -> datetime:
     return t.replace(second=0, microsecond=0)
 

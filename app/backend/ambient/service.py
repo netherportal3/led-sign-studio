@@ -53,6 +53,8 @@ class AmbientController:
         self._stop = threading.Event()
         self._force = False
         self._busy = False
+        # counts manual sends: a day upload that waits for its moment gives way to one made meanwhile
+        self._manual_sends = 0
         self._thread: threading.Thread | None = None
         self.state_path = os.path.join(self.dir, "state.json")
         d = self._load_state()
@@ -237,6 +239,7 @@ class AmbientController:
             with self._lock:
                 base = R.RotationState.from_dict(self.rot.to_dict())
                 coordinated = self.sched.last_kind == "day"
+                manual_sends = self._manual_sends
             kinds = R.cycle_kinds(build_cfg, wx is not None, bool(heads))
             clock_mode = bool(build_cfg["screens"]["clock"]["on"]) or not kinds
             guess = base.last_payload_bytes
@@ -286,10 +289,12 @@ class AmbientController:
                          rot.start.strftime("%H:%M:%S"))
                 if self._stop.wait(wait):
                     return
-                with self._lock:
-                    if self.sched.last_kind == "manual" or (self.sched.paused_until or 0) > time.time():
-                        log.info("ambient: a manual send came first; this upload is dropped")
-                        return
+            with self._lock:
+                # last_kind is often "manual" here (that is why this upload runs), so it cannot say
+                # whether a new manual send arrived since the plan: the counter can
+                if self._manual_sends != manual_sends or (self.sched.paused_until or 0) > time.time():
+                    log.info("ambient: a manual send or pause came first; this upload is dropped")
+                    return
             gif = rot.gif
             to_mono = time.monotonic() - time.time()
             finish_at = [rot.start.timestamp() + to_mono] + [t + to_mono for t in later]
@@ -391,6 +396,7 @@ class AmbientController:
         cfg = self.settings.get()
         with self._lock:
             SC.record_manual(self.sched, time.time(), cfg["pause_minutes_on_manual"])
+            self._manual_sends += 1
         self._save_state()
         log.info("ambient: manual send, paused for %d min", cfg["pause_minutes_on_manual"])
 
