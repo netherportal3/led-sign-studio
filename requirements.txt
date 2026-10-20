@@ -1,2 +1,2 @@
 bleak==3.0.2
-pillow==12.3.0
+pillow==13.0.0
